@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<info>
+    <id>cernboxauthtoken</id>
+    <name>Cern Box Auth Token</name>
+    <description>My first ownCloud app</description>
+    <licence>AGPL</licence>
+    <author>Hugo Gonzalez Labrador</author>
+    <version>0.0.1</version>
+    <namespace>CernBoxAuthToken</namespace>
+    <category>other</category>
+    <dependencies>
+        <owncloud min-version="9.0" />
+    </dependencies>
+</info>
