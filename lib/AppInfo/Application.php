@@ -24,16 +24,18 @@ class Application extends App {
 		if($user) {
 			$identity = $user->getUID();
 			header("X-Access-Token: $identity");
-			$token = $this->forgeToken($identity);
+			$token = $this->forgeToken($user);
+                        \OC::$server->getLogger()->error("IDENTITY $identity TOKEN $token");
 			$data = ["key" => "cernboxauthtoken", "x-access-token" => $token];
 			\OCP\Util::addHeader("data", $data);
 		}
 	}
 
-	public function forgeToken($username) {
+	public function forgeToken($user) {
 		$token = [
-			"account_id" => $username,
+			"account_id" => $user->getUID(),
 			"groups" => [],
+			"display_name" => $user->getDisplayName()
 		];
 		$jwt = JWT::encode($token, $this->jwt_sign_secret);
 		return $jwt;
