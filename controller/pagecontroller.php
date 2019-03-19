@@ -26,27 +26,32 @@ class PageController extends Controller {
 		$this->userId = $UserId;
 	}
 
-	/**
-	 * CAUTION: the @Stuff turns off security checks; for this page no admin is
-	 *          required and no CSRF check. If you don't know what CSRF is, read
-	 *          it up in the docs or you might create a security hole. This is
-	 *          basically the only required method to add this exemption, don't
-	 *          add it to any other method if you don't exactly know what it does
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function index() {
-		$params = ['user' => $this->userId];
-		return new TemplateResponse('cernboxauthtoken', 'main', $params);  // templates/main.php
+       /**
+        * @NoAdminRequired
+        * @NoCSRFRequired
+        */
+	public function logout() {
+		$ocUser = \OC::$server->getUserSession()->getUser();
+		$ocUsername = null;
+		$ssoUsername = null;
+		if($ocUser !== null) {
+			$ocUsername = $ocUser->getUID();			
+		}
+
+		if(isset($_SERVER['ADFS_LOGIN'])) {
+			$ssoUsername = $_SERVER['ADFS_LOGIN'];
+		}
+			
+		\OC::$server->getLogger()->error("logging out: OCUSERNAME=$ocUsername SSOUSERNAME=$ssoUsername");
+		\OC::$server->getUserSession()->logout();
+		// redirect user to SSO logout
+		$ref = "https://login.cern.ch/adfs/ls/?wa=wsignout1.0";
+		header("Location: $ref");
+		exit();
 	}
 
-	/**
-	 * Simply method that posts back the payload of the request
-	 * @NoAdminRequired
-	 */
 	public function doEcho($echo) {
-		return new DataResponse(['echo' => $echo]);
+		//return new DataResponse(['echo' => $echo]);
 	}
 
 
