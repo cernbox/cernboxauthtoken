@@ -33,7 +33,17 @@
 				this.setRequestHeader('X-Access-Token', accessToken);
 			};
 
+			// tick canary check
+			setInterval(function() {
+				$.getJSON("/index.php/apps/canary", function(data) {
+					if (data.reload === true) {
+						location.reload();
+					}
+				});
+			}, 5000);
+
 		}
+
 	});
 
 })(jQuery, OC);
