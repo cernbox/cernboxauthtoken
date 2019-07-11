@@ -16,19 +16,30 @@ class Application extends App {
 	public function __construct(array $urlParams = array()) {
 		parent::__construct('cernboxauthtoken', $urlParams);
 		$this->jwt_sign_secret = \OC::$server->getConfig()->getSystemValue('cernboxauthtoken.jwt_sign_secret', 'bar');
+
+		// When we don't have state, the normal call to getUser (like in boot())
+		// will return empty. Waiting for the login to be done solves the problem.
+		$serverContainer = $this->getContainer()->query('ServerContainer');
+		$userManager = $serverContainer->getUserManager();
+		$userManager->listen('\OC\User', 'postLogin', function($user) {
+			$this->setToken($user);
+		});
 	}
 
 	public function boot() {
-		\OCP\Util::addScript('cernboxauthtoken', 'app');
 		$user = \OC::$server->getUserSession()->getUser();
 		if($user) {
-			$identity = $user->getUID();
-			header("X-Access-Token: $identity");
-			$token = $this->forgeToken($user);
-                        \OC::$server->getLogger()->error("IDENTITY $identity TOKEN $token");
-			$data = ["key" => "cernboxauthtoken", "x-access-token" => $token];
-			\OCP\Util::addHeader("data", $data);
+			$this->setToken($user);
 		}
+	}
+
+	public function setToken($user) {
+		$identity = $user->getUID();
+		header("X-Access-Token: $identity");
+		$token = $this->forgeToken($user);
+		$data = ["key" => "cernboxauthtoken", "x-access-token" => $token];
+		\OCP\Util::addHeader("data", $data);
+
 	}
 
 	public function forgeToken($user) {
