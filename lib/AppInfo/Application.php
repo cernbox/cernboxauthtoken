@@ -43,7 +43,10 @@ class Application extends App {
 	}
 
 	public function forgeToken($user) {
+		$issuedAt = time();
+		$expirationTime = $issuedAt + 86400; // one day;
 		$token = [
+			"exp" => $expirationTime,
 			"account_id" => $user->getUID(),
 			"groups" => [],
 			"display_name" => $user->getDisplayName()
